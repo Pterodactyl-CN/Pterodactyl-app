@@ -1,5 +1,5 @@
 /*
-* Copyright 2018 Ruben Talstra and Yvan Watchman
+* Copyright 2018-2019 Ruben Talstra and Yvan Watchman
 *
 * Licensed under the GNU General Public License v3.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ import 'package:pterodactyl_app/page/auth/shared_preferences_helper.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
-import 'package:pterodactyl_app/globals.dart' as globals;
+import 'package:pterodactyl_app/models/globals.dart' as globals;
 import 'dart:async';
 import 'dart:convert';
-import 'servers.dart';
-import 'settings.dart';
 import 'package:pterodactyl_app/main.dart';
+import 'package:pterodactyl_app/page/company/accuratenode/client/servers.dart';
+import 'package:pterodactyl_app/page/company/accuratenode/client/settings.dart';
 
 class MyAccurateNodeHomePage extends StatefulWidget {
   MyAccurateNodeHomePage({Key key}) : super(key: key);

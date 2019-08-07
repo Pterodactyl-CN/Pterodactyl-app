@@ -1,5 +1,5 @@
 /*
-* Copyright 2018 Ruben Talstra and Yvan Watchman
+* Copyright 2018-2019 Ruben Talstra and Yvan Watchman
 *
 * Licensed under the GNU General Public License v3.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -15,36 +15,30 @@
 */
 import 'dart:io';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:pterodactyl_app/models/server.dart';
+import 'package:pterodactyl_app/models/stats.dart';
+import 'package:pterodactyl_app/page/client/console.dart';
+import 'package:pterodactyl_app/page/client/utilization.dart';
+import 'package:titled_navigation_bar/titled_navigation_bar.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
-import 'package:pterodactyl_app/globals.dart' as globals;
+import 'package:pterodactyl_app/models/globals.dart' as globals;
 import 'package:pterodactyl_app/page/auth/shared_preferences_helper.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:pterodactyl_app/main.dart';
 import 'console.dart';
+import 'filemanager/filemanager.dart';
 import 'servers.dart';
 import 'utilization.dart';
 
-class Send {
-  final String id, name;
-  const Send({
-    this.id,
-    this.name,
-  });
-}
-
-class Stats {
-  final String id;
-  const Stats({
-    this.id,
-  });
-}
 
 class ActionServerPage extends StatefulWidget {
   ActionServerPage({Key key, this.server}) : super(key: key);
-  final User server;
+  final Server server;
 
   @override
   _ActionServerPageState createState() => _ActionServerPageState();
@@ -52,6 +46,9 @@ class ActionServerPage extends StatefulWidget {
 
 class _ActionServerPageState extends State<ActionServerPage> {
   Map data;
+  bool dialVisible = true;
+
+  BuildContext context;
 
   Future postStart() async {
     String _api = await SharedPreferencesHelper.getString("apiKey");
@@ -141,15 +138,75 @@ class _ActionServerPageState extends State<ActionServerPage> {
     return response;
   }
 
+  void setDialVisible(bool value) {
+    setState(() {
+      dialVisible = value;
+    });
+  }
+
+  SpeedDial buildSpeedDial() {
+    return SpeedDial(
+      backgroundColor: globals.useDarkTheme ? Colors.blue : null,
+      animatedIcon: AnimatedIcons.menu_close,
+      animatedIconTheme: IconThemeData(size: 22.0),
+      visible: dialVisible,
+      curve: Curves.bounceIn,
+      children: [
+        SpeedDialChild(
+          child: Icon((FontAwesomeIcons.plug), color: Colors.white),
+          backgroundColor: Color(0xFF2dce89),
+          onTap: () {
+            postStart();
+          },
+          label: DemoLocalizations.of(context).trans('action_start'),
+          labelStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+          labelBackgroundColor: Color(0xFF2dce89),
+        ),
+        SpeedDialChild(
+          child: Icon((FontAwesomeIcons.ban), color: Colors.white),
+          backgroundColor: Color(0xFFf5365c),
+          onTap: () {
+            _stop();
+          },
+          label: DemoLocalizations.of(context).trans('action_stop'),
+          labelStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+          labelBackgroundColor: Color(0xFFf5365c),
+        ),
+        SpeedDialChild(
+          child: Icon((FontAwesomeIcons.redo), color: Colors.white),
+          backgroundColor: Color(0xFF5e72e4),
+          onTap: () {
+            _restart();
+          },
+          label: DemoLocalizations.of(context).trans('action_restart'),
+          labelStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+          labelBackgroundColor: Color(0xFF5e72e4),
+        ),
+        SpeedDialChild(
+          child: Icon((FontAwesomeIcons.skull), color: Colors.white),
+          backgroundColor: Color(0xFFf5365c),
+          onTap: () {
+            _kill();
+          },
+          label: DemoLocalizations.of(context).trans('action_kill'),
+          labelStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+          labelBackgroundColor: Color(0xFFf5365c),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    this.context = context;
     return Scaffold(
         appBar: AppBar(
           elevation: 0.0,
           backgroundColor: globals.useDarkTheme ? null : Colors.transparent,
           leading: IconButton(
             color: globals.useDarkTheme ? Colors.white : Colors.black,
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
+                    '/home', (Route<dynamic> route) => false),
             icon: Icon(
               Icons.arrow_back,
               color: globals.useDarkTheme ? Colors.white : Colors.black,
@@ -161,213 +218,68 @@ class _ActionServerPageState extends State<ActionServerPage> {
                   fontWeight: FontWeight.w700)),
         ),
         body: StaggeredGridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12.0,
-          mainAxisSpacing: 12.0,
-          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          children: <Widget>[
-            _buildTile(
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Material(
-                          color: Colors.green,
-                          shape: CircleBorder(),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Icon(Icons.play_arrow,
-                                color: Colors.white, size: 30.0),
-                          )),
-                      Padding(padding: EdgeInsets.only(bottom: 12.0)),
-                      Text(DemoLocalizations.of(context).trans('action_start'),
-                          style: TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 23.0)),
-                    ]),
-              ),
-              onTap: () {
-                postStart();
-              },
-            ),
-            _buildTile(
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Material(
-                          color: Colors.red,
-                          shape: CircleBorder(),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Icon(Icons.stop,
-                                color: Colors.white, size: 30.0),
-                          )),
-                      Padding(padding: EdgeInsets.only(bottom: 12.0)),
-                      Text(DemoLocalizations.of(context).trans('action_stop'),
-                          style: TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 23.0)),
-                    ]),
-              ),
-              onTap: () {
-                _stop();
-              },
-            ),
-            _buildTile(
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Material(
-                          color: Colors.blue,
-                          shape: CircleBorder(),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Icon(Icons.refresh,
-                                color: Colors.white, size: 30.0),
-                          )),
-                      Padding(padding: EdgeInsets.only(bottom: 12.0)),
-                      Text(
-                          DemoLocalizations.of(context).trans('action_restart'),
-                          style: TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 23.0)),
-                    ]),
-              ),
-              onTap: () {
-                _restart();
-              },
-            ),
-            _buildTile(
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Material(
-                          color: Colors.red,
-                          shape: CircleBorder(),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Icon(Icons.offline_bolt,
-                                color: Colors.white, size: 30.0),
-                          )),
-                      Padding(padding: EdgeInsets.only(bottom: 12.0)),
-                      Text(DemoLocalizations.of(context).trans('action_kill'),
-                          style: TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 23.0)),
-                    ]),
-              ),
-              onTap: () {
-                _kill();
-              },
-            ),
-            _buildTile(
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Material(
-                          color: Colors.amber,
-                          shape: CircleBorder(),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Icon(Icons.show_chart,
-                                color: Colors.white, size: 30.0),
-                          )),
-                      Padding(padding: EdgeInsets.only(bottom: 12.0)),
-                      Text(DemoLocalizations.of(context).trans('action_stats'),
-                          style: TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 23.0)),
-                    ]),
-              ),
-              onTap: () {
-                var route = new MaterialPageRoute(
-                  builder: (BuildContext context) =>
-                      new StatePage(server: Stats(id: widget.server.id)),
-                );
-                Navigator.of(context).push(route);
-              },
-            ),
-            _buildTile(
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Material(
-                          color: Colors.green,
-                          shape: CircleBorder(),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Icon(Icons.folder_open,
-                                color: Colors.white, size: 30.0),
-                          )),
-                      Padding(padding: EdgeInsets.only(bottom: 12.0)),
-                      Text(DemoLocalizations.of(context).trans('action_file'),
-                          style: TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 23.0)),
-                    ]),
-              ),
-              onTap: () {
-                _filelist();
-              },
-            ),
-            _buildTile(
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(DemoLocalizations.of(context).trans('console'),
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w700, fontSize: 20.0))
-                        ],
-                      ),
-                      Material(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(24.0),
-                          child: Center(
-                              child: Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Icon(Icons.code,
-                                color: Colors.white, size: 30.0),
-                          )))
-                    ]),
-              ),
-              onTap: () {
-                var route = new MaterialPageRoute(
-                  builder: (BuildContext context) => new SendPage(
-                      server:
-                          Send(id: widget.server.id, name: widget.server.name)),
-                );
-                Navigator.of(context).push(route);
-              },
-            ),
-          ],
-          staggeredTiles: [
-            StaggeredTile.extent(1, 161.0),
-            StaggeredTile.extent(1, 161.0),
-            StaggeredTile.extent(1, 161.0),
-            StaggeredTile.extent(1, 161.0),
-            StaggeredTile.extent(1, 161.0),
-            StaggeredTile.extent(1, 161.0),
-            StaggeredTile.extent(2, 110.0),
-          ],
-        ));
+      crossAxisCount: 2,
+      crossAxisSpacing: 12.0,
+      mainAxisSpacing: 12.0,
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      children: <Widget>[
+        _buildTile(
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Material(
+                      color: Colors.green,
+                      shape: CircleBorder(),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Icon(Icons.folder_open,
+                            color: Colors.white, size: 30.0),
+                      )),
+                  Padding(padding: EdgeInsets.only(bottom: 12.0)),
+                  Text(DemoLocalizations.of(context).trans('action_file'),
+                      style: TextStyle(
+                          fontWeight: FontWeight.w700, fontSize: 23.0)),
+                ]),
+          ),
+          onTap: () {
+            var route = MaterialPageRoute(
+              builder: (BuildContext context) => FileManager(
+                server: widget.server
+              )
+            );
+            Navigator.of(context).push(route);
+          },
+        ),
+      ],
+      staggeredTiles: [
+        StaggeredTile.extent(1, 161.0),
+        StaggeredTile.extent(1, 161.0),
+      ],
+    ),
+        floatingActionButton: buildSpeedDial(),
+        bottomNavigationBar: TitledBottomNavigationBar(
+            initialIndex: 0,
+            currentIndex: 0, // Use this to update the Bar giving a position
+            onTap: _navigate,
+            items: [
+              TitledNavigationBarItem(
+                backgroundColor: globals.useDarkTheme ? Colors.black87 : null,
+                  title:
+                      "Info",
+                  icon: FontAwesomeIcons.info),
+              TitledNavigationBarItem(
+                backgroundColor: globals.useDarkTheme ? Colors.black87 : null,
+                  title:
+                      DemoLocalizations.of(context).trans('utilization_stats'),
+                  icon: FontAwesomeIcons.chartBar),
+              TitledNavigationBarItem(
+                backgroundColor: globals.useDarkTheme ? Colors.black87 : null,
+                  title: DemoLocalizations.of(context).trans('console'),
+                  icon: FontAwesomeIcons.terminal),
+            ]));
   }
 
   Widget _buildTile(Widget child, {Function() onTap}) {
@@ -385,13 +297,30 @@ class _ActionServerPageState extends State<ActionServerPage> {
             child: child));
   }
 
+  Future _navigate(int index) async {
+    if(index == 1) {
+      Navigator.of(this.context).pushAndRemoveUntil(
+          new MaterialPageRoute(builder: (BuildContext context) =>
+          new StatePage(
+              server: Stats(id: widget.server.id, name: widget.server.name))
+          ), (Route<dynamic> route) => false);
+    }
+    if(index == 2) {
+      Navigator.of(this.context).pushAndRemoveUntil(
+          new MaterialPageRoute(builder: (BuildContext context) =>
+          new SendPage(
+              server: Server(id: widget.server.id, name: widget.server.name))
+          ), (Route<dynamic> route) => false);
+    }
+  }
+
   _restart() {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         String title = DemoLocalizations.of(context).trans('action_restart');
-        String message = "Are you sure you want to restart your server?";
+        String message = DemoLocalizations.of(context).trans('action_restart_warning');
         String btnLabelNo = DemoLocalizations.of(context).trans('no');
         String btnLabelYes = DemoLocalizations.of(context).trans('yes');
         return Platform.isIOS
@@ -443,7 +372,7 @@ class _ActionServerPageState extends State<ActionServerPage> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         String title = DemoLocalizations.of(context).trans('action_stop');
-        String message = "are you sure you want to stop this server.";
+        String message = DemoLocalizations.of(context).trans('action_stop_warning');
         String btnLabelNo = DemoLocalizations.of(context).trans('no');
         String btnLabelYes = DemoLocalizations.of(context).trans('yes');
         return Platform.isIOS
@@ -495,8 +424,7 @@ class _ActionServerPageState extends State<ActionServerPage> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         String title = DemoLocalizations.of(context).trans('action_kill');
-        String message =
-            "Are you sure you want to kill your server, nothing will be saved.";
+        String message = DemoLocalizations.of(context).trans('action_kill_warning');
         String btnLabelNo = DemoLocalizations.of(context).trans('no');
         String btnLabelYes = DemoLocalizations.of(context).trans('yes');
         return Platform.isIOS
@@ -533,43 +461,6 @@ class _ActionServerPageState extends State<ActionServerPage> {
                     child: Text(btnLabelYes),
                     onPressed: () {
                       postKill();
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              );
-      },
-    );
-  }
-
-  _filelist() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        String title = DemoLocalizations.of(context).trans('action_file');
-        String message = DemoLocalizations.of(context).trans('added_soon');
-        String btnLabelYes = DemoLocalizations.of(context).trans('yes');
-        return Platform.isIOS
-            ? new CupertinoAlertDialog(
-                title: Text(title),
-                content: Text(message),
-                actions: <Widget>[
-                  FlatButton(
-                    child: Text(btnLabelYes),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              )
-            : new AlertDialog(
-                title: Text(title),
-                content: Text(message),
-                actions: <Widget>[
-                  FlatButton(
-                    child: Text(btnLabelYes),
-                    onPressed: () {
                       Navigator.pop(context);
                     },
                   ),

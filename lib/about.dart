@@ -1,5 +1,5 @@
 /*
-* Copyright 2018 Ruben Talstra and Yvan Watchman
+* Copyright 2018-2019 Ruben Talstra and Yvan Watchman
 *
 * Licensed under the GNU General Public License v3.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ class _AboutPageState extends State<AboutPage> {
         backgroundColor: Colors.blue[300],
       ),
       body: new Center(
-        child: new Text("About Page", style: new TextStyle(fontSize: 35.0)),
+        child: new Text("There will be more", style: new TextStyle(fontSize: 35.0)),
       ),
     );
   }

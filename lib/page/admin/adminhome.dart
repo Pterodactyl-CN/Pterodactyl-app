@@ -1,5 +1,5 @@
 /*
-* Copyright 2018 Ruben Talstra and Yvan Watchman
+* Copyright 2018-2019 Ruben Talstra and Yvan Watchman
 *
 * Licensed under the GNU General Public License v3.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import '../auth/shared_preferences_helper.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:http/http.dart' as http;
-import '../../globals.dart' as globals;
+import 'package:pterodactyl_app/models/globals.dart' as globals;
 import 'dart:async';
 import 'dart:convert';
 import 'adminservers.dart';

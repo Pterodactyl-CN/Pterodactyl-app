@@ -1,5 +1,5 @@
 /*
-* Copyright 2018 Ruben Talstra and Yvan Watchman
+* Copyright 2018-2019 Ruben Talstra and Yvan Watchman
 *
 * Licensed under the GNU General Public License v3.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -16,20 +16,12 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
-import 'package:pterodactyl_app/globals.dart' as globals;
+import 'package:pterodactyl_app/models/globals.dart' as globals;
 import 'package:flutter/cupertino.dart';
 import 'package:pterodactyl_app/page/auth/shared_preferences_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pterodactyl_app/main.dart';
 import 'package:pterodactyl_app/page/auth/selecthost.dart';
-
-class User {
-  final String api, url;
-  const User({
-    this.api,
-    this.url,
-  });
-}
 
 class LoginDeploysPage extends StatefulWidget {
   @override

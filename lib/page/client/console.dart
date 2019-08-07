@@ -1,5 +1,5 @@
 /*
-* Copyright 2018 Ruben Talstra and Yvan Watchman
+* Copyright 2018-2019 Ruben Talstra and Yvan Watchman
 *
 * Licensed under the GNU General Public License v3.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -15,20 +15,27 @@
 */
 import 'package:adhara_socket_io/adhara_socket_io.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pterodactyl_app/models/stats.dart';
+import 'package:pterodactyl_app/models/server.dart';
 import 'package:pterodactyl_app/page/auth/shared_preferences_helper.dart';
 import 'package:http/http.dart' as http;
-import 'package:pterodactyl_app/globals.dart' as globals;
+import 'package:pterodactyl_app/models/globals.dart' as globals;
 import 'dart:async';
 import 'dart:convert';
 import 'package:pterodactyl_app/main.dart';
+import 'package:pterodactyl_app/page/client/actionserver.dart';
+import 'package:titled_navigation_bar/titled_navigation_bar.dart';
+import 'package:responsive_container/responsive_container.dart';
 import 'actionserver.dart';
+import 'utilization.dart';
 
 String socketUrl;
 List<String> logRows = new List<String>();
 
 class SendPage extends StatefulWidget {
   SendPage({Key key, this.server}) : super(key: key);
-  final Send server;
+  final Server server;
 
   @override
   _SendPageState createState() => _SendPageState();
@@ -42,7 +49,7 @@ class _SendPageState extends State<SendPage> {
 
   final _sendController = TextEditingController();
 
-  Future postSend() async {
+  Future sendCommand() async {
     String _send = await SharedPreferencesHelper.getString("send");
     String _api = await SharedPreferencesHelper.getString("apiKey");
     String _url = await SharedPreferencesHelper.getString("panelUrl");
@@ -164,78 +171,101 @@ class _SendPageState extends State<SendPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0.0,
-        backgroundColor: globals.useDarkTheme ? null : Colors.transparent,
-        leading: IconButton(
-          color: globals.useDarkTheme ? Colors.white : Colors.black,
-          onPressed: () {
-            disconnect();
-            Navigator.of(context).pop();
-          },
-          icon: Icon(Icons.arrow_back,
-              color: globals.useDarkTheme ? Colors.white : Colors.black),
+        appBar: AppBar(
+          elevation: 0.0,
+          backgroundColor: globals.useDarkTheme ? null : Colors.transparent,
+          leading: IconButton(
+            color: globals.useDarkTheme ? Colors.white : Colors.black,
+            onPressed: () {
+              disconnect();
+              Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
+            },
+            icon: Icon(Icons.arrow_back,
+                color: globals.useDarkTheme ? Colors.white : Colors.black),
+          ),
+          title: Text(DemoLocalizations.of(context).trans('console'),
+              style: TextStyle(
+                  color: globals.useDarkTheme ? Colors.white : Colors.black,
+                  fontWeight: FontWeight.w700)),
         ),
-        title: Text(DemoLocalizations.of(context).trans('console'),
-            style: TextStyle(
-                color: globals.useDarkTheme ? Colors.white : Colors.black,
-                fontWeight: FontWeight.w700)),
-      ),
-      body: SafeArea(
-        child: ListView(
-          padding: EdgeInsets.symmetric(horizontal: 12.0),
-          children: <Widget>[
-            SizedBox(height: 10.0),
+        body: SafeArea(
+          child: ListView(
+            children: <Widget>[
+          ResponsiveContainer(
+            heightPercent: 73.0, //value percent of screen total height
+            widthPercent: 100.0,  //value percent of screen total width
+            child:
             Container(
-              height: 425,
-              color: Colors.black,
-              child: SingleChildScrollView(
-                  child: new Wrap(
-                direction: Axis.vertical,
-                children: <Widget>[getTextWidgets()],
-              )),
-            ),
-            SizedBox(height: 10.0),
-            AccentColorOverride(
-              color: Colors.red,
-              child: TextField(
-                controller: _sendController,
-                decoration: InputDecoration(
-                  labelText: (DemoLocalizations.of(context)
-                      .trans('type_command_here')),
-                ),
+                color: Colors.black,
+                child: SingleChildScrollView(
+                    child: new Wrap(
+                  direction: Axis.vertical,
+                  children: <Widget>[getTextWidgets()],
+                )),
               ),
-            ),
-            ButtonBar(
-              children: <Widget>[
-                FlatButton(
-                  child: Text(DemoLocalizations.of(context).trans('clear')),
-                  shape: BeveledRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(7.0)),
-                  ),
-                  onPressed: () {
-                    _sendController.clear();
-                  },
-                ),
-                RaisedButton(
-                  child:
-                      Text(DemoLocalizations.of(context).trans('send_command')),
-                  elevation: 8.0,
-                  shape: BeveledRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(7.0)),
-                  ),
-                  onPressed: () async {
-                    await SharedPreferencesHelper.setString(
-                        "send", _sendController.text);
-                    postSend();
-                  },
-                ),
-              ],
-            ),
-          ],
         ),
-      ),
-    );
+              SizedBox(height: 1.0),
+              TextField(
+                autofocus: true,
+                onSubmitted: (text) async {
+                  await SharedPreferencesHelper.setString(
+                      "send", _sendController.text);
+                  sendCommand();
+                  _sendController.clear();
+                },
+                style: TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  border:InputBorder.none,
+                  filled:true,
+                  fillColor: Colors.black,
+                  hintStyle: TextStyle(color: Colors.white),
+                  prefixStyle: TextStyle(color: Colors.white),
+                  hintText: DemoLocalizations.of(context)
+                      .trans('type_command_here'),
+                  prefixText:'container:~/\$ ',
+                ),
+                controller: _sendController,
+              ),
+              
+            ],
+          ),
+        ),
+        bottomNavigationBar: TitledBottomNavigationBar(
+            initialIndex: 0,
+            currentIndex: 2, // Use this to update the Bar giving a position
+            onTap: _navigate,
+            items: [
+              TitledNavigationBarItem(
+                  backgroundColor: globals.useDarkTheme ? Colors.black87 : null,
+                  title: "Info", icon: FontAwesomeIcons.info),
+              TitledNavigationBarItem(
+                  backgroundColor: globals.useDarkTheme ? Colors.black87 : null,
+                  title:
+                      DemoLocalizations.of(context).trans('utilization_stats'),
+                  icon: FontAwesomeIcons.chartBar),
+              TitledNavigationBarItem(
+                  backgroundColor: globals.useDarkTheme ? Colors.black87 : null,
+                  title: DemoLocalizations.of(context).trans('console'),
+                  icon: FontAwesomeIcons.terminal),
+            ]));
+  }
+
+
+  Future _navigate(int index) async {
+    if(index == 0) {
+      Navigator.of(this.context).pushAndRemoveUntil(
+          new MaterialPageRoute(builder: (BuildContext context) =>
+          new ActionServerPage(
+              server: Server(id: widget.server.id, name: widget.server.name))
+          ), (Route<dynamic> route) => false);
+    }
+    if(index == 1) {
+      Navigator.of(this.context).pushAndRemoveUntil(
+          new MaterialPageRoute(builder: (BuildContext context) =>
+          new StatePage(
+              server: Stats(id: widget.server.id, name: widget.server.name))
+          ), (Route<dynamic> route) => false);
+    }
   }
 }
 

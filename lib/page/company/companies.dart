@@ -1,5 +1,5 @@
 /*
-* Copyright 2018 Ruben Talstra and Yvan Watchman
+* Copyright 2018-2019 Ruben Talstra and Yvan Watchman
 *
 * Licensed under the GNU General Public License v3.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -57,6 +57,13 @@ import 'package:pterodactyl_app/page/company/revivenode/client/servers.dart';
 import 'package:pterodactyl_app/page/company/revivenode/client/about.dart';
 import 'package:pterodactyl_app/page/company/revivenode/client/settings.dart';
 
+// RoyaleHosting
+import 'package:pterodactyl_app/page/company/royalehosting/client/home.dart';
+import 'package:pterodactyl_app/page/company/royalehosting/client/login.dart';
+import 'package:pterodactyl_app/page/company/royalehosting/client/servers.dart';
+import 'package:pterodactyl_app/page/company/royalehosting/client/about.dart';
+import 'package:pterodactyl_app/page/company/royalehosting/client/settings.dart';
+
 /// Dart has no functionality to dynamically create class instances
 /// Till then, we'll have to manually add every route.
 Map companyRoutes() {
@@ -102,17 +109,20 @@ Map companyRoutes() {
     '/revivenode/about': (BuildContext context) => new ReviveNodeAboutPage(),
     '/revivenode/settings': (BuildContext context) => new ReviveNodeSettingsList(),
   };
+  c['royalehosting'] = <String, WidgetBuilder>{
+    '/royalehosting/home': (BuildContext context) => new MyRoyaleHostingHomePage(),
+    '/royalehosting/login': (BuildContext context) => new LoginRoyaleHostingPage(),
+    '/royalehosting/servers': (BuildContext context) => new RoyaleHostingServerListPage(),
+    '/royalehosting/about': (BuildContext context) => new RoyaleHostingAboutPage(),
+    '/royalehosting/settings': (BuildContext context) => new RoyaleHostingSettingsList(),
+  };  
   return c;
 }
 
-//'/coderslight/home': (BuildContext context) => new MyCodersLightHomePage(),
-//'/minicenter/home': (BuildContext context) => new MyMiniCenterHomePage(),
-//'/planetnode/home': (BuildContext context) => new MyPlanetNodeHomePage(),
-//'/revivenode/home': (BuildContext context) => new MyReviveNodeHomePage(),
 
 List<String> companies() {
   List<String> companies = [];
   companies.addAll(
-      ['deploys', 'coderslight', 'minicenter', 'planetnode', 'revivenode', 'accuratenode']);
+      ['deploys', 'coderslight', 'minicenter', 'planetnode', 'revivenode', 'accuratenode', 'royalehosting']);
   return companies;
 }

@@ -1,5 +1,5 @@
 /*
-* Copyright 2018 Ruben Talstra and Yvan Watchman
+* Copyright 2018-2019 Ruben Talstra and Yvan Watchman
 *
 * Licensed under the GNU General Public License v3.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -15,20 +15,20 @@
 */
 import 'package:adhara_socket_io/adhara_socket_io.dart';
 import 'package:flutter/material.dart';
+import 'package:pterodactyl_app/models/server.dart';
 import 'package:pterodactyl_app/page/auth/shared_preferences_helper.dart';
 import 'package:http/http.dart' as http;
-import 'package:pterodactyl_app/globals.dart' as globals;
+import 'package:pterodactyl_app/models/globals.dart' as globals;
 import 'dart:async';
 import 'dart:convert';
 import 'package:pterodactyl_app/main.dart';
-import 'actionserver.dart';
 
 String socketUrl;
 List<String> logRows = new List<String>();
 
 class SendPage extends StatefulWidget {
   SendPage({Key key, this.server}) : super(key: key);
-  final Send server;
+  final Server server;
 
   @override
   _SendPageState createState() => _SendPageState();

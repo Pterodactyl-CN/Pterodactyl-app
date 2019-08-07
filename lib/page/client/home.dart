@@ -1,5 +1,5 @@
 /*
-* Copyright 2018 Ruben Talstra and Yvan Watchman
+* Copyright 2018-2019 Ruben Talstra and Yvan Watchman
 *
 * Licensed under the GNU General Public License v3.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -13,18 +13,19 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-import 'package:flutter/material.dart';
 import 'dart:io';
-import 'package:pterodactyl_app/page/auth/shared_preferences_helper.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:http/http.dart' as http;
-import 'package:pterodactyl_app/globals.dart' as globals;
 import 'dart:async';
 import 'dart:convert';
-import 'servers.dart';
-import 'settings.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:pterodactyl_app/main.dart';
+import 'package:pterodactyl_app/models/settings.dart';
+import 'package:pterodactyl_app/models/globals.dart' as globals;
+import 'package:pterodactyl_app/page/auth/shared_preferences_helper.dart';
 import 'package:pterodactyl_app/page/auth/check_update.dart';
+import 'package:pterodactyl_app/page/client/servers.dart';
+import 'package:pterodactyl_app/page/client/settings.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key}) : super(key: key);
@@ -36,6 +37,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   Map data;
   int userTotalServers = 0;
+  String name, email;
 
   Future getDataHome() async {
     String _api = await SharedPreferencesHelper.getString("apiKey");
@@ -52,6 +54,11 @@ class _MyHomePageState extends State<MyHomePage> {
       );
 
       data = await json.decode(response.body);
+
+      name = await SharedPreferencesHelper.getString('first_name')
+          + ' ' +await SharedPreferencesHelper.getString('last_name');
+      email = await SharedPreferencesHelper.getString('email');
+
       setState(() {
         userTotalServers = data["meta"]["pagination"]["total"];
       });
@@ -175,8 +182,18 @@ class _MyHomePageState extends State<MyHomePage> {
                           )),
                     ]),
               ),
-              onTap: () => Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (_) => SettingsList())),
+              onTap: () {
+                var route = new MaterialPageRoute(
+                  builder: (BuildContext context) => new SettingsList(
+                      settings: SettingsInfo(
+                          servers: userTotalServers,
+                          subServer: 4,
+                          schedules: 2,
+                          name: name,
+                          email: email)),
+                );
+                Navigator.of(context).push(route);
+              },
             ),
             _buildTile(
               Padding(

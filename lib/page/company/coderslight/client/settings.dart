@@ -1,5 +1,5 @@
 /*
-* Copyright 2018 Ruben Talstra and Yvan Watchman
+* Copyright 2018-2019 Ruben Talstra and Yvan Watchman
 *
 * Licensed under the GNU General Public License v3.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:pterodactyl_app/globals.dart' as globals;
+import 'package:pterodactyl_app/models/globals.dart' as globals;
 import 'package:flutter/services.dart';
 import 'package:get_version/get_version.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
@@ -28,10 +28,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 class CodersLightSettingsList extends StatefulWidget {
   @override
-  SettingsListPageState createState() => new SettingsListPageState();
+  _CodersLightSettingsListState createState() => new _CodersLightSettingsListState();
 }
 
-class SettingsListPageState extends State<CodersLightSettingsList> {
+class _CodersLightSettingsListState extends State<CodersLightSettingsList> {
   String _projectVersion = '';
 
   @override
@@ -106,10 +106,6 @@ class SettingsListPageState extends State<CodersLightSettingsList> {
               subtitle: Text(
                 DemoLocalizations.of(context).trans('notifications_sub'),
               ),
-              //trailing: Switch(
-              //onChanged: handelTheme,
-              //value: globals.useDarkTheme,
-              //),
             ),
             Divider(
               height: 20.0,

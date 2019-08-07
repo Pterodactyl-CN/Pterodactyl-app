@@ -1,5 +1,5 @@
 /*
-* Copyright 2018 Ruben Talstra and Yvan Watchman
+* Copyright 2018-2019 Ruben Talstra and Yvan Watchman
 *
 * Licensed under the GNU General Public License v3.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -18,29 +18,16 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
-import 'package:pterodactyl_app/globals.dart' as globals;
+import 'package:pterodactyl_app/models/globals.dart' as globals;
+import 'package:pterodactyl_app/models/server.dart';
+import 'package:pterodactyl_app/models/stats.dart';
 import 'package:pterodactyl_app/page/auth/shared_preferences_helper.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:pterodactyl_app/main.dart';
-import 'console.dart';
+import 'package:pterodactyl_app/page/company/deploys/client/console.dart';
 import 'package:pterodactyl_app/page/company/deploys/client/home/zoom_scaffold.dart';
-import 'utilization.dart';
-
-class Send {
-  final String id, name;
-  const Send({
-    this.id,
-    this.name,
-  });
-}
-
-class Stats {
-  final String id;
-  const Stats({
-    this.id,
-  });
-}
+import 'package:pterodactyl_app/page/company/deploys/client/utilization.dart';
 
 class ActionServerPage extends StatefulWidget {
   ActionServerPage({Key key, this.server}) : super(key: key);
@@ -348,7 +335,7 @@ class _ActionServerPageState extends State<ActionServerPage> {
                 var route = new MaterialPageRoute(
                   builder: (BuildContext context) => new SendPage(
                       server:
-                          Send(id: widget.server.id, name: widget.server.name)),
+                          Server(id: widget.server.id, name: widget.server.name)),
                 );
                 Navigator.of(context).push(route);
               },

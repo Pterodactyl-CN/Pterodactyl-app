@@ -1,5 +1,5 @@
 /*
-* Copyright 2018 Ruben Talstra and Yvan Watchman
+* Copyright 2018-2019 Ruben Talstra and Yvan Watchman
 *
 * Licensed under the GNU General Public License v3.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -13,16 +13,15 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_sparkline/flutter_sparkline.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:pterodactyl_app/globals.dart' as globals;
+import 'package:pterodactyl_app/models/globals.dart' as globals;
+import 'package:pterodactyl_app/models/stats.dart';
 import 'package:pterodactyl_app/page/auth/shared_preferences_helper.dart';
-
-import 'dart:async';
-import 'dart:convert';
-import 'actionserver.dart';
 import 'package:pterodactyl_app/main.dart';
 
 class StatePage extends StatefulWidget {
